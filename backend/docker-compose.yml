@@ -1,0 +1,103 @@
+version: '4.38'
+
+services:
+
+   # 🔹 ML Service
+  ml_service:
+    build: ./ml_service
+    container_name: parkinson_ml
+    restart: always
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_HOST=database
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=parkinsons
+    volumes:
+      - ./ml_service:/app
+    networks:
+      - parkinson_net
+
+      
+  # 🔹 PostgreSQL Database
+  database:
+    build: ./database
+    container_name: parkinson_db
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=parkinsons
+      - PGDATA=/var/lib/postgresql/data/pgdata  # Change this path
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Map to default postgres path
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d parkinsons"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - parkinson_net
+
+
+  # 🔹 FastAPI Backend
+  backend:
+    build: ./backend
+    container_name: parkinson_backend
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_HOST=10.0.0.205 # Updated to external database IP
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=parkinsons
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - parkinson_net
+
+  # 🔹 Next.js Web Dashboard (for Doctors)
+  frontend:
+    build: ./web_app
+    container_name: parkinson_frontend
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:8000
+    ports:
+      - "3000:3000"
+
+  # 🔹 Nginx Reverse Proxy
+  nginx:
+    build: ./nginx
+    container_name: parkinson_nginx
+    restart: always
+    depends_on:
+      - backend
+      - frontend
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
+    driver: local  # Explicitly set the driver
+  frontend:
+  backend:
+  nginx:
+
+networks:
+  parkinson_net:
+    driver: bridge

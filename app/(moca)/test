@@ -1,0 +1,269 @@
+import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { router } from 'expo-router';
+import Voice, { SpeechResultsEvent } from '@react-native-voice/voice';
+import * as Speech from 'expo-speech';
+import Colors from '@/constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SentenceRepetition } from '@/constants/database';
+
+const SENTENCES = {
+  sentence_1: "I only know that John is the one to help today",
+  sentence_2: "The cat always hid under the couch when dogs were in the room"
+};
+
+export default function SentenceRepetitionTest() {
+  const [currentSentence, setCurrentSentence] = useState<1 | 2>(1);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [spokenText, setSpokenText] = useState('');
+  const [responses, setResponses] = useState<string[][]>([[], []]);
+  const [showInstruction, setShowInstruction] = useState(true);
+  const [noSpeechDetected, setNoSpeechDetected] = useState(false);
+
+  useEffect(() => {
+    Voice.onSpeechResults = onSpeechResults;
+    Voice.onSpeechEnd = onSpeechEnd;
+    Voice.onSpeechError = (error) => {
+      console.error('Speech recognition error:', error);
+      setIsRecording(false);
+    };
+
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
+    };
+  }, []);
+
+  const speakInstruction = async () => {
+    setIsSpeaking(true);
+    const instruction = currentSentence === 1
+      ? "I am going to read you a sentence. Repeat it after me, exactly as I say it"
+      : "Now I am going to read you another sentence. Repeat it after me, exactly as I say it";
+
+    await Speech.speak(instruction, { rate: 0.8 });
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    await Speech.speak(
+      currentSentence === 1 ? SENTENCES.sentence_1 : SENTENCES.sentence_2,
+      { rate: 0.8 }
+    );
+    
+    setIsSpeaking(false);
+    setShowInstruction(false);
+  };
+
+  const startRecording = async () => {
+    try {
+      setNoSpeechDetected(false);
+      await Voice.start('en-US');
+      setIsRecording(true);
+      setSpokenText('');
+
+      // Add speech detection timeout
+      setTimeout(() => {
+        if (isRecording && !spokenText) {
+          Voice.stop();
+          setIsRecording(false);
+          setNoSpeechDetected(true);
+          Alert.alert(
+            'No Speech Detected', 
+            'Please try recording again and speak clearly'
+          );
+        }
+      }, 5000); // 5 second timeout
+
+    } catch (error) {
+      console.error('Failed to start recording:', error);
+      Alert.alert('Error', 'Failed to start speech recognition');
+    }
+  };
+
+  const stopRecording = async () => {
+    if (!isRecording) return;
+
+    try {
+      await Voice.stop();
+      setIsRecording(false);
+      
+      if (!spokenText) {
+        setNoSpeechDetected(true);
+        Alert.alert(
+          'No Speech Detected', 
+          'Please try recording again and speak clearly',
+          [
+            {
+              text: 'OK',
+              onPress: () => setNoSpeechDetected(false)
+            }
+          ]
+        );
+        return;
+      }
+      
+      if (spokenText) {
+        setResponses(prev => {
+          const newResponses = [...prev];
+          newResponses[currentSentence - 1] = [spokenText];
+          return newResponses;
+        });
+
+        if (currentSentence === 1) {
+          setCurrentSentence(2);
+          setShowInstruction(true);
+          setSpokenText('');
+        } else {
+          // Test complete, format and store results
+          const formattedResponses = responses.flat();
+          
+          const sentenceData: SentenceRepetition = {
+            expected_responses: [SENTENCES.sentence_1, SENTENCES.sentence_2],
+            actual_responses: formattedResponses
+          };
+
+          // Store in AsyncStorage
+          await AsyncStorage.setItem('@sentence_repetition_data', JSON.stringify(sentenceData));
+
+          console.log('Sentence Repetition Results:');
+          console.log('Expected:', sentenceData.expected_responses);
+          console.log('Actual:', sentenceData.actual_responses);
+
+          router.push({
+            pathname: '/(moca)/introduction',
+            params: { 
+              sentenceRepetition: JSON.stringify(sentenceData)
+            }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to stop recording:', error);
+      Alert.alert('Error', 'Failed to save recording');
+    }
+  };
+
+  const onSpeechResults = (e: SpeechResultsEvent) => {
+    if (e.value) {
+      const text = e.value[0];
+      setSpokenText(text);
+    }
+  };
+
+  const onSpeechEnd = () => {
+    setIsRecording(false);
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Sentence Repetition</Text>
+      
+      {showInstruction ? (
+        <>
+          <Text style={styles.instruction}>
+            {currentSentence === 1
+              ? "First Sentence"
+              : "Second Sentence"}
+          </Text>
+          <Pressable
+            style={[styles.button, isSpeaking && styles.buttonDisabled]}
+            onPress={speakInstruction}
+            disabled={isSpeaking}
+          >
+            <Text style={styles.buttonText}>
+              {isSpeaking ? 'Speaking...' : 'Start'}
+            </Text>
+          </Pressable>
+        </>
+      ) : (
+        <>
+          {spokenText && (
+            <Text style={styles.spokenText}>You said: {spokenText}</Text>
+          )}
+          
+          {noSpeechDetected && (
+            <Text style={styles.errorText}>
+              No speech detected. Please try again.
+            </Text>
+          )}
+          
+          <Pressable
+            style={[
+              styles.button, 
+              isRecording && styles.recordingButton,
+              noSpeechDetected && styles.errorButton
+            ]}
+            onPress={isRecording ? stopRecording : startRecording}
+          >
+            <Ionicons
+              name={isRecording ? "stop-circle" : "mic"}
+              size={24}
+              color={Colors.textLight}
+            />
+            <Text style={styles.buttonText}>
+              {isRecording ? 'Stop Recording' : 'Start Recording'}
+            </Text>
+          </Pressable>
+        </>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: Colors.background,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.textLight,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  instruction: {
+    fontSize: 18,
+    color: Colors.textLight,
+    textAlign: 'center',
+    marginBottom: 30,
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
+    padding: 15,
+    borderRadius: 8,
+    marginVertical: 10,
+    gap: 8,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+  recordingButton: {
+    backgroundColor: Colors.error,
+  },
+  buttonText: {
+    color: Colors.textLight,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  spokenText: {
+    fontSize: 16,
+    color: Colors.textLight,
+    textAlign: 'center',
+    marginVertical: 20,
+    fontStyle: 'italic',
+  },
+  errorText: {
+    color: Colors.error,
+    fontSize: 16,
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  errorButton: {
+    backgroundColor: Colors.error,
+    opacity: 0.8,
+  }
+});
