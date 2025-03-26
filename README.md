@@ -97,7 +97,20 @@ The PostgreSQL database includes tables for:
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Contact
+## About Me
 
-Your Name - suprit77@gmail.com
-Project Link: https://github.com/ssp964/parkinsons-monitoring-app
+I'm a data enthusiast passionate about transforming raw data into meaningful insights. With hands-on experience in data engineering, data science and analytics. I enjoy building scalable pipelines, designing efficient data models and uncovering patterns through advanced SQL and statistical techniques.
+
+Currently exploring the modern data stack and applying best practices across the data lifecycle.
+
+<p align="left">
+  <a href="https://linkedin.com/in/supritspatil" target="_blank">
+    <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"/>
+  </a>
+  <a href="https://www.supritpatil.co/" target="_blank">
+    <img src="https://img.shields.io/badge/Website-FF6F00?style=for-the-badge&logo=Google-Chrome&logoColor=white" alt="Website"/>
+  </a>
+  <a href="https://github.com/ssp964" target="_blank">
+    <img src="https://img.shields.io/badge/GitHub-24292E?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
+  </a>
+</p>
