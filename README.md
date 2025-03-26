@@ -1,103 +1,127 @@
 # Parkinson's Monitoring System
 
-A comprehensive medical tracking system for monitoring Parkinson's disease patients, featuring a web dashboard for doctors, real-time data processing, and secure data storage.
+This project was developed during the **H2AI Hackathon** as a comprehensive medical tracking system for monitoring Parkinson's disease patients. It integrates multiple services including real-time data processing, secure storage and a web dashboard for doctors. The system leverages modern web technologies and machine learning to support medical professionals in diagnosis and ongoing monitoring.
 
-## System Architecture
+---
 
-The system consists of several microservices:
+## Project Overview
 
-- **Web Dashboard** ([`web_app`](web_app/)) - Next.js frontend for doctors
-- **Backend API** ([`backend`](backend/)) - FastAPI service handling authentication and data
-- **Processing Service** ([`processing`](processing/)) - ML-based analysis of patient data
-- **Database** ([`database`](database/)) - PostgreSQL database with medical records
-- **Nginx** ([`nginx`](nginx/)) - Reverse proxy for routing requests
+This system integrates multiple services to track and analyze patient health data related to Parkinson's disease. It leverages modern web technologies and machine learning to support medical professionals in diagnosis and monitoring.
 
-## Getting Started
+---
+
+## Project Objective
+
+To develop a scalable and secure platform for real-time monitoring of Parkinson's patients, offering doctors a centralized dashboard for data analysis and decision-making.
+
+---
+
+## Key Skills & Techniques
+
+- Microservices architecture  
+- Web development with Next.js and FastAPI  
+- Machine learning for data analysis  
+- Secure backend authentication (JWT)  
+- Data visualization  
+- Docker & container orchestration  
+
+---
+
+## Project Structure
+
+- **Web Dashboard** ([`web_app`](web_app/)) – Next.js frontend for doctors  
+- **Backend API** ([`backend`](backend/)) – FastAPI service handling authentication and data  
+- **Processing Service** ([`processing`](processing/)) – ML-based analysis of patient data  
+- **Database** ([`database`](database/)) – PostgreSQL database with medical records  
+- **Nginx** ([`nginx`](nginx/)) – Reverse proxy for routing requests  
+
+---
+
+## Project Features
+
+### Doctor Dashboard
+- Patient management  
+- Real-time data visualization  
+- Test results tracking  
+- Secure authentication  
+
+### Patient Data Processing
+- Clock Drawing Test (CDT) analysis  
+- Speech processing  
+- Movement analysis  
+- Real-time scoring
+
+---
+
+## 💻 How to Run This Project
 
 ### Prerequisites
 
-- Docker and Docker Compose
-- Node.js 19+ (for local development)
-- Python 3.9+ (for local development)
-- PostgreSQL 13+ (for local development)
+- Docker and Docker Compose  
+- Node.js 19+ (for local development)  
+- Python 3.9+ (for local development)  
+- PostgreSQL 13+ (for local development)  
 
 ### Installation
 
 1. Clone the repository:
-```sh
-git clone git@github.com:ssp964/parkinsons-monitoring-app.git
-cd parkinsons-monitoring-app
-```
+   ```bash
+   git clone git@github.com:ssp964/parkinsons-monitoring-app.git
+   cd parkinsons-monitoring-app
+   ```
 
 2. Start the services using Docker Compose:
-```sh
-cd backend
-docker-compose build
-docker-compose up -d
-```
+   ```bash
+   cd backend
+   docker-compose build
+   docker-compose up -d
+   ```
 
 3. The following services will be available:
-- Web Dashboard: http://localhost:3000
-- Backend API: http://localhost:8000
-- Database: localhost:5432
+   - Web Dashboard: http://localhost:3000  
+   - Backend API: http://localhost:8000  
+   - Database: localhost:5432  
 
 ### Development Setup
 
 #### Web Dashboard
 
-```sh
+```bash
 cd web_app
 npm install
 npm run dev
 ```
 
-
-
-## Features
-
-- **Doctor Dashboard**
-  - Patient management
-  - Real-time data visualization
-  - Test results tracking
-  - Secure authentication
-
-- **Patient Data Processing**
-  - Clock Drawing Test (CDT) analysis
-  - Speech processing
-  - Movement analysis
-  - Real-time scoring
-
-- **Security**
-  - JWT-based authentication
-  - Role-based access control 
-  - Encrypted data storage
+---
 
 ## API Documentation
 
-The backend API documentation is available at:
+The backend API documentation is available at:  
 - Swagger UI: http://localhost:8000/docs
 
-## Database Schema
+---
+
+## 🗃Database Schema
 
 The PostgreSQL database includes tables for:
-- Doctors
-- Patients
-- Test Records
-- Images
+- Doctors  
+- Patients  
+- Test Records  
+- Images  
 
-## Contributing
+---
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## Contributions
 
-## License
+1. Fork the repository  
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)  
+3. Commit your changes (`git commit -m 'Add amazing feature'`)  
+4. Push to the branch (`git push origin feature/amazing-feature`)  
+5. Open a Pull Request  
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+---
 
-## About Me
+## 🙋‍♂️ About Me
 
 I'm a data enthusiast passionate about transforming raw data into meaningful insights. With hands-on experience in data engineering, data science and analytics. I enjoy building scalable pipelines, designing efficient data models and uncovering patterns through advanced SQL and statistical techniques.
 
